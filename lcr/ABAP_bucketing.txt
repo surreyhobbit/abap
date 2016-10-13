@@ -1,0 +1,554 @@
+
+
+PROGRAM trans_routine.
+
+
+*---------------------------------------------------------------------*
+*       CLASS routine DEFINITION
+*---------------------------------------------------------------------*
+*
+*---------------------------------------------------------------------*
+CLASS lcl_transform DEFINITION.
+  PUBLIC SECTION.
+
+*  Attributs
+    DATA:
+      p_check_master_data_exist
+            TYPE RSODSOCHECKONLY READ-ONLY,
+*-    Instance for getting request runtime attributs;
+*     Available information: Refer to methods of
+*     interface 'if_rsbk_request_admintab_view'
+      p_r_request
+            TYPE REF TO if_rsbk_request_admintab_view READ-ONLY.
+
+  PRIVATE SECTION.
+
+    TYPE-POOLS: rsd, rstr.
+
+*   Rule specific types
+    TYPES:
+      BEGIN OF _ty_s_TG_1,
+*      InfoObject: ZB3CFSDTE Basel 3-CF Start Date.
+        /BIC/ZB3CFSDTE           TYPE /BIC/OIZB3CFSDTE,
+*      InfoObject: 0BA_1EXCNT External Number.
+        BA_1EXCNT           TYPE /BI0/OIBA_1EXCNT,
+*      InfoObject: ZB3LN_NUM B3 - CashFlow Line Number.
+        /BIC/ZB3LN_NUM           TYPE /BIC/OIZB3LN_NUM,
+*      InfoObject: ZB3CFTYPE Amount type.
+        /BIC/ZB3CFTYPE           TYPE /BIC/OIZB3CFTYPE,
+*      InfoObject: LRCFDTE Date due / cashflow date.
+        /BIC/LRCFDTE           TYPE /BIC/OILRCFDTE,
+*      InfoObject: ZB3BUNAME B3 - Business Unit Name.
+        /BIC/ZB3BUNAME           TYPE /BIC/OIZB3BUNAME,
+*      InfoObject: ZB3BUSYS B3 - Business Unit  System.
+        /BIC/ZB3BUSYS           TYPE /BIC/OIZB3BUSYS,
+*      InfoObject: ZB3EUR001 B3 - CashFlow Amt[EUR].
+        /BIC/ZB3EUR001           TYPE /BIC/OIZB3EUR001,
+*      InfoObject: ZB3CFSCUR Basel 3-CF Source Currency.
+        /BIC/ZB3CFSCUR           TYPE /BIC/OIZB3CFSCUR,
+*      InfoObject: ZB3CFSCRE Basel 3-CF Source.
+        /BIC/ZB3CFSCRE           TYPE /BIC/OIZB3CFSCRE,
+*      InfoObject: ZB3CFBK00 B3 - Cashflow Day In the past.
+        /BIC/ZB3CFBK00           TYPE /BIC/OIZB3CFBK00,
+*      InfoObject: ZB3CFRTOT B3 - Cashflow Total.
+        /BIC/ZB3CFRTOT           TYPE /BIC/OIZB3CFRTOT,
+*      InfoObject: ZB3CFDY01 B3 - Cashflow Day 01.
+        /BIC/ZB3CFDY01           TYPE /BIC/OIZB3CFDY01,
+*      InfoObject: ZB3CFDY02 B3 - Cashflow Day 02.
+        /BIC/ZB3CFDY02           TYPE /BIC/OIZB3CFDY02,
+*      InfoObject: ZB3CFDY03 B3 - Cashflow Day 03.
+        /BIC/ZB3CFDY03           TYPE /BIC/OIZB3CFDY03,
+*      InfoObject: ZB3CFDY04 B3 - Cashflow Day 04.
+        /BIC/ZB3CFDY04           TYPE /BIC/OIZB3CFDY04,
+*      InfoObject: ZB3CFDY05 B3 - Cashflow Day 05.
+        /BIC/ZB3CFDY05           TYPE /BIC/OIZB3CFDY05,
+*      InfoObject: ZB3CFDY06 B3 - Cashflow Day 06.
+        /BIC/ZB3CFDY06           TYPE /BIC/OIZB3CFDY06,
+*      InfoObject: ZB3CFDY07 B3 - Cashflow Day 07.
+        /BIC/ZB3CFDY07           TYPE /BIC/OIZB3CFDY07,
+*      InfoObject: ZB3CFDY08 B3 - Cashflow Day 08.
+        /BIC/ZB3CFDY08           TYPE /BIC/OIZB3CFDY08,
+*      InfoObject: ZB3CFDY09 B3 - Cashflow Day 09.
+        /BIC/ZB3CFDY09           TYPE /BIC/OIZB3CFDY09,
+*      InfoObject: ZB3CFDY10 B3 - Cashflow Day 10.
+        /BIC/ZB3CFDY10           TYPE /BIC/OIZB3CFDY10,
+*      InfoObject: ZB3CFDY11 B3 - Cashflow Day 11.
+        /BIC/ZB3CFDY11           TYPE /BIC/OIZB3CFDY11,
+*      InfoObject: ZB3CFDY12 B3 - Cashflow Day 12.
+        /BIC/ZB3CFDY12           TYPE /BIC/OIZB3CFDY12,
+*      InfoObject: ZB3CFDY13 B3 - Cashflow Day 13.
+        /BIC/ZB3CFDY13           TYPE /BIC/OIZB3CFDY13,
+*      InfoObject: ZB3CFDY14 B3 - Cashflow Day 14.
+        /BIC/ZB3CFDY14           TYPE /BIC/OIZB3CFDY14,
+*      InfoObject: ZB3CFDY15 B3 - Cashflow Day 15.
+        /BIC/ZB3CFDY15           TYPE /BIC/OIZB3CFDY15,
+*      InfoObject: ZB3CFDY16 B3 - Cashflow Day 16.
+        /BIC/ZB3CFDY16           TYPE /BIC/OIZB3CFDY16,
+*      InfoObject: ZB3CFDY17 B3 - Cashflow Day 17.
+        /BIC/ZB3CFDY17           TYPE /BIC/OIZB3CFDY17,
+*      InfoObject: ZB3CFDY18 B3 - Cashflow Day 18.
+        /BIC/ZB3CFDY18           TYPE /BIC/OIZB3CFDY18,
+*      InfoObject: ZB3CFDY19 B3 - Cashflow Day 19.
+        /BIC/ZB3CFDY19           TYPE /BIC/OIZB3CFDY19,
+*      InfoObject: ZB3CFDY20 B3 - Cashflow Day 20.
+        /BIC/ZB3CFDY20           TYPE /BIC/OIZB3CFDY20,
+*      InfoObject: ZB3CFDY21 B3 - Cashflow Day 21.
+        /BIC/ZB3CFDY21           TYPE /BIC/OIZB3CFDY21,
+*      InfoObject: ZB3CFDY22 B3 - Cashflow Day 22.
+        /BIC/ZB3CFDY22           TYPE /BIC/OIZB3CFDY22,
+*      InfoObject: ZB3CFDY23 B3 - Cashflow Day 23.
+        /BIC/ZB3CFDY23           TYPE /BIC/OIZB3CFDY23,
+*      InfoObject: ZB3CFDY24 B3 - Cashflow Day 24.
+        /BIC/ZB3CFDY24           TYPE /BIC/OIZB3CFDY24,
+*      InfoObject: ZB3CFDY25 B3 - Cashflow Day 25.
+        /BIC/ZB3CFDY25           TYPE /BIC/OIZB3CFDY25,
+*      InfoObject: ZB3CFDY26 B3 - Cashflow Day 26.
+        /BIC/ZB3CFDY26           TYPE /BIC/OIZB3CFDY26,
+*      InfoObject: ZB3CFDY27 B3 - Cashflow Day 27.
+        /BIC/ZB3CFDY27           TYPE /BIC/OIZB3CFDY27,
+*      InfoObject: ZB3CFDY28 B3 - Cashflow Day 28.
+        /BIC/ZB3CFDY28           TYPE /BIC/OIZB3CFDY28,
+*      InfoObject: ZB3CFDY29 B3 - Cashflow Day 29.
+        /BIC/ZB3CFDY29           TYPE /BIC/OIZB3CFDY29,
+*      InfoObject: ZB3CFDY30 B3 - Cashflow Day 30.
+        /BIC/ZB3CFDY30           TYPE /BIC/OIZB3CFDY30,
+*      InfoObject: ZB3CFDY31 B3 - Cashflow Day 31.
+        /BIC/ZB3CFDY31           TYPE /BIC/OIZB3CFDY31,
+*      InfoObject: ZB3CFDY32 B3 - Cashflow Day 32.
+        /BIC/ZB3CFDY32           TYPE /BIC/OIZB3CFDY32,
+*      InfoObject: ZB3CFDY33 B3 - Cashflow Day 33.
+        /BIC/ZB3CFDY33           TYPE /BIC/OIZB3CFDY33,
+*      InfoObject: ZB3CFDY34 B3 - Cashflow Day 34.
+        /BIC/ZB3CFDY34           TYPE /BIC/OIZB3CFDY34,
+*      InfoObject: ZB3CFDY35 B3 - Cashflow Day 35.
+        /BIC/ZB3CFDY35           TYPE /BIC/OIZB3CFDY35,
+*      InfoObject: ZB3CFDY36 B3 - Cashflow Day 36.
+        /BIC/ZB3CFDY36           TYPE /BIC/OIZB3CFDY36,
+*      InfoObject: ZB3CFDY37 B3 - Cashflow Day 37.
+        /BIC/ZB3CFDY37           TYPE /BIC/OIZB3CFDY37,
+*      InfoObject: ZB3CFDY38 B3 - Cashflow Day 38.
+        /BIC/ZB3CFDY38           TYPE /BIC/OIZB3CFDY38,
+*      InfoObject: ZB3CFDY39 B3 - Cashflow Day 39.
+        /BIC/ZB3CFDY39           TYPE /BIC/OIZB3CFDY39,
+*      InfoObject: ZB3CFDY40 B3 - Cashflow Day 40.
+        /BIC/ZB3CFDY40           TYPE /BIC/OIZB3CFDY40,
+*      InfoObject: ZB3CFDY41 B3 - Cashflow Day 41.
+        /BIC/ZB3CFDY41           TYPE /BIC/OIZB3CFDY41,
+*      InfoObject: ZB3CFDY42 B3 - Cashflow Day 42.
+        /BIC/ZB3CFDY42           TYPE /BIC/OIZB3CFDY42,
+*      InfoObject: ZB3CFDY43 B3 - Cashflow Day 43.
+        /BIC/ZB3CFDY43           TYPE /BIC/OIZB3CFDY43,
+*      InfoObject: ZB3CFDY44 B3 - Cashflow Day 44.
+        /BIC/ZB3CFDY44           TYPE /BIC/OIZB3CFDY44,
+*      InfoObject: ZB3CFDY45 B3 - Cashflow Day 45.
+        /BIC/ZB3CFDY45           TYPE /BIC/OIZB3CFDY45,
+*      InfoObject: ZB3CFBK01 B3-Bucketed CF days 1 -> 30.
+        /BIC/ZB3CFBK01           TYPE /BIC/OIZB3CFBK01,
+*      InfoObject: ZB3CFBK02 B3-Bucketed CF days 31 -> 90.
+        /BIC/ZB3CFBK02           TYPE /BIC/OIZB3CFBK02,
+*      InfoObject: ZB3CFBK03 B3-Bucketed CF days 91 -> 180.
+        /BIC/ZB3CFBK03           TYPE /BIC/OIZB3CFBK03,
+*      InfoObject: ZB3CFBK04 B3-Bucketed CF days 181 -> 270.
+        /BIC/ZB3CFBK04           TYPE /BIC/OIZB3CFBK04,
+*      InfoObject: ZB3CFBK05 B3-Bucketed CF days 271 -> 365.
+        /BIC/ZB3CFBK05           TYPE /BIC/OIZB3CFBK05,
+*      InfoObject: ZB3CFBK06 B3-Bucketed CF > 365 Days.
+        /BIC/ZB3CFBK06           TYPE /BIC/OIZB3CFBK06,
+*      InfoObject: ZB3CFBK07 B3-Bucketed CF days 2 -> 7.
+        /BIC/ZB3CFBK07           TYPE /BIC/OIZB3CFBK07,
+*      InfoObject: ZB3CFBK08 B3-Bucketed CF days 8 -> 14.
+        /BIC/ZB3CFBK08           TYPE /BIC/OIZB3CFBK08,
+*      InfoObject: ZB3CFBK09 B3-Bucketed CF days 15 -> 30.
+        /BIC/ZB3CFBK09           TYPE /BIC/OIZB3CFBK09,
+*      InfoObject: ZB3CFBK10 B3-Bucketed CF days 181 -> 365.
+        /BIC/ZB3CFBK10           TYPE /BIC/OIZB3CFBK10,
+*      InfoObject: ZB3CFBK11 B3-Bucketed CF  > 1 Yr -> 2 Yr.
+        /BIC/ZB3CFBK11           TYPE /BIC/OIZB3CFBK11,
+*      InfoObject: ZB3CFBK12 B3-Bucketed CF  > 2Yrs -> 3 Yrs.
+        /BIC/ZB3CFBK12           TYPE /BIC/OIZB3CFBK12,
+*      InfoObject: ZB3CFBK13 B3-Bucketed CF  > 3Yrs -> 5 Yrs.
+        /BIC/ZB3CFBK13           TYPE /BIC/OIZB3CFBK13,
+*      InfoObject: ZB3CFBK14 B3-Bucketed CF  > 5 Yrs -> 10 Yrs.
+        /BIC/ZB3CFBK14           TYPE /BIC/OIZB3CFBK14,
+*      InfoObject: ZB3CFBK15 B3-Bucketed CF  > 10 Yrs.
+        /BIC/ZB3CFBK15           TYPE /BIC/OIZB3CFBK15,
+*      InfoObject: ZB3CFBK16 B3-Bucketed CF  days 1 -> 90.
+        /BIC/ZB3CFBK16           TYPE /BIC/OIZB3CFBK16,
+*      Field: RECORD.
+        RECORD           TYPE RSARECORD,
+      END   OF _ty_s_TG_1.
+    TYPES:
+      _ty_t_TG_1        TYPE STANDARD TABLE OF _ty_s_TG_1
+                        WITH NON-UNIQUE DEFAULT KEY.
+
+*$*$ begin of global - insert your declaration only below this line  *-*
+    ... "insert your code here
+*$*$ end of global - insert your declaration only before this line   *-*
+    METHODS
+      new_record__end_routine
+        IMPORTING
+          source_segid             type rstran_segid
+          source_record            type sytabix
+        EXPORTING
+          record_new               type sytabix.
+
+    METHODS
+      end_routine
+        IMPORTING
+          request                  type rsrequest
+          datapackid               type rsdatapid
+          segid                    type rsbk_segid
+        EXPORTING
+          monitor                  type rstr_ty_t_monitors
+        CHANGING
+          RESULT_PACKAGE              type _ty_t_TG_1
+        RAISING
+          cx_rsrout_abort
+          cx_rsbk_errorcount.
+    METHODS
+      inverse_end_routine
+        IMPORTING
+          i_th_fields_outbound         TYPE rstran_t_field_inv
+          I_R_SELSET_OUTBOUND          TYPE REF TO CL_RSMDS_SET
+          i_is_main_selection          TYPE rs_bool
+          i_r_selset_outbound_complete TYPE REF TO cl_rsmds_set
+          i_r_universe_inbound         TYPE REF TO CL_RSMDS_UNIVERSE
+        CHANGING
+          c_th_fields_inbound          TYPE rstran_t_field_inv
+          c_r_selset_inbound           TYPE REF TO CL_RSMDS_SET
+          c_exact                      TYPE rs_bool.
+ENDCLASS.                    "routine DEFINITION
+
+*$*$ begin of 2nd part global - insert your code only below this line  *
+... "insert your code here
+*$*$ end of 2nd part global - insert your code only before this line   *
+
+*---------------------------------------------------------------------*
+*       CLASS routine IMPLEMENTATION
+*---------------------------------------------------------------------*
+*
+*---------------------------------------------------------------------*
+CLASS lcl_transform IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*       Method end_routine
+*----------------------------------------------------------------------*
+*       Calculation of result package via end routine.
+*       Note: Update of target fields depends on rule assignment in
+*       transformation editor. Only fields that have a rule assigned,
+*       are updated to the data target.
+*----------------------------------------------------------------------*
+*   <-> result package
+*----------------------------------------------------------------------*
+  METHOD end_routine.
+*=== Segments ===
+
+    FIELD-SYMBOLS:
+      <RESULT_FIELDS>    TYPE _ty_s_TG_1.
+
+    DATA:
+      MONITOR_REC     TYPE rstmonitor.
+
+*$*$ begin of routine - insert your code only below this line        *-*
+    ... "insert your code here
+*--  fill table "MONITOR" with values of structure "MONITOR_REC"
+*-   to make monitor entries
+    ... "to cancel the update process
+*    raise exception type CX_RSROUT_ABORT.
+
+    DATA:  L_DATE_DIFF_IN_DAYS TYPE I.
+    DATA L_ZB3CFBDTE type /BIC/OIZB3CFBDTE.
+*    DATA L_ZB3CFBDTE_NUM(8)       TYPE N.
+*    DATA L_LRCFDTE_NUM(8)          TYPE N.
+    DATA L_ZB3CFBDTE_datum  TYPE sy-datum.
+
+    CLEAR L_ZB3CFBDTE_datum.
+    SELECT SINGLE /BIC/ZB3CFBDTE
+      FROM /BIC/MZB3CFBDTE
+      INTO L_ZB3CFBDTE
+    WHERE /BIC/ZB3CFBDTE ne ''.
+*IF L_ZB3CFBDTE IS POPULATED THEN USE THAT DATE AS CASH FLOWE BASE DATE
+*ELSE USE THE FIRST OF THE CURRENT MONTH
+    IF L_ZB3CFBDTE     = ''.
+      L_ZB3CFBDTE      = SY-DATUM.
+      L_ZB3CFBDTE+6(2) = '01'.
+    ENDIF.
+
+*    L_ZB3CFBDTE_NUM = L_ZB3CFBDTE.
+    L_ZB3CFBDTE_datum = L_ZB3CFBDTE.
+
+    LOOP AT RESULT_PACKAGE ASSIGNING <result_fields>.
+
+*      L_LRCFDTE_NUM = <result_fields>-/BIC/LRCFDTE.
+      L_DATE_DIFF_IN_DAYS = <result_fields>-/BIC/LRCFDTE -
+      L_ZB3CFBDTE_datum.
+*      L_DATE_DIFF_IN_DAYS = L_LRCFDTE_NUM - L_ZB3CFBDTE_NUM.
+*when difference = 0 => day 1, 1 => day 2, hence the offset in the logic
+      CASE L_DATE_DIFF_IN_DAYS.
+        WHEN 0.
+          <result_fields>-/BIC/ZB3CFDY01 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 1.
+          <result_fields>-/BIC/ZB3CFDY02 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 2.
+          <result_fields>-/BIC/ZB3CFDY03 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 3.
+          <result_fields>-/BIC/ZB3CFDY04 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 4.
+          <result_fields>-/BIC/ZB3CFDY05 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 5.
+          <result_fields>-/BIC/ZB3CFDY06 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 6.
+          <result_fields>-/BIC/ZB3CFDY07 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 7.
+          <result_fields>-/BIC/ZB3CFDY08 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 8.
+          <result_fields>-/BIC/ZB3CFDY09 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 9.
+          <result_fields>-/BIC/ZB3CFDY10 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 10.
+          <result_fields>-/BIC/ZB3CFDY11 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 11.
+          <result_fields>-/BIC/ZB3CFDY12 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 12.
+          <result_fields>-/BIC/ZB3CFDY13 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 13.
+          <result_fields>-/BIC/ZB3CFDY14 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 14.
+          <result_fields>-/BIC/ZB3CFDY15 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 15.
+          <result_fields>-/BIC/ZB3CFDY16 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 16.
+          <result_fields>-/BIC/ZB3CFDY17 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 17.
+          <result_fields>-/BIC/ZB3CFDY18 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 18.
+          <result_fields>-/BIC/ZB3CFDY19 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 19.
+          <result_fields>-/BIC/ZB3CFDY20 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 20.
+          <result_fields>-/BIC/ZB3CFDY21 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 21.
+          <result_fields>-/BIC/ZB3CFDY22 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 22.
+          <result_fields>-/BIC/ZB3CFDY23 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 23.
+          <result_fields>-/BIC/ZB3CFDY24 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 24.
+          <result_fields>-/BIC/ZB3CFDY25 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 25.
+          <result_fields>-/BIC/ZB3CFDY26 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 26.
+          <result_fields>-/BIC/ZB3CFDY27 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 27.
+          <result_fields>-/BIC/ZB3CFDY28 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 28.
+          <result_fields>-/BIC/ZB3CFDY29 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 29.
+          <result_fields>-/BIC/ZB3CFDY30 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 30.
+          <result_fields>-/BIC/ZB3CFDY31 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 31.
+          <result_fields>-/BIC/ZB3CFDY32 =
+          <result_fields>-/BIC/ZB3EUR001.
+* START ADDITIONAL FIELDS 14-11-2013
+        WHEN 32.
+          <result_fields>-/BIC/ZB3CFDY33 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 33.
+          <result_fields>-/BIC/ZB3CFDY34 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 34.
+          <result_fields>-/BIC/ZB3CFDY35 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 35.
+          <result_fields>-/BIC/ZB3CFDY36 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 36.
+          <result_fields>-/BIC/ZB3CFDY37 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 37.
+          <result_fields>-/BIC/ZB3CFDY38 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 38.
+          <result_fields>-/BIC/ZB3CFDY39 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 39.
+          <result_fields>-/BIC/ZB3CFDY40 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 40.
+          <result_fields>-/BIC/ZB3CFDY41 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 41.
+          <result_fields>-/BIC/ZB3CFDY42 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 42.
+          <result_fields>-/BIC/ZB3CFDY43 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 43.
+          <result_fields>-/BIC/ZB3CFDY44 =
+          <result_fields>-/BIC/ZB3EUR001.
+        WHEN 44.
+          <result_fields>-/BIC/ZB3CFDY45 =
+          <result_fields>-/BIC/ZB3EUR001.
+* END   ADDITIONAL FIELDS 14-11-2013
+      ENDCASE.
+
+      IF  L_DATE_DIFF_IN_DAYS < 0.
+* NO BUCKET
+      ELSEIF  L_DATE_DIFF_IN_DAYS < 30.
+* DAY 1 -> 30
+        <result_fields>-/BIC/ZB3CFBK01 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ELSEIF  L_DATE_DIFF_IN_DAYS < 90.
+* DAY 31 -> 90
+        <result_fields>-/BIC/ZB3CFBK02 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ELSEIF L_DATE_DIFF_IN_DAYS < 180.
+* DAY 91 -> 180
+        <result_fields>-/BIC/ZB3CFBK03 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ELSEIF L_DATE_DIFF_IN_DAYS < 270.
+* DAY 181 -> 270
+        <result_fields>-/BIC/ZB3CFBK04 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ELSEIF L_DATE_DIFF_IN_DAYS < 365.
+* DAY 271 -> 365
+        <result_fields>-/BIC/ZB3CFBK05 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ELSE.
+* > 365 DAYS
+        <result_fields>-/BIC/ZB3CFBK06 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ENDIF.
+
+      IF  L_DATE_DIFF_IN_DAYS < 1.
+* BUCKETED ABOVE
+      ELSEIF  L_DATE_DIFF_IN_DAYS < 7.
+* DAY 2 -> 7
+        <result_fields>-/BIC/ZB3CFBK07 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ELSEIF  L_DATE_DIFF_IN_DAYS < 14.
+* DAY 8 -> 14
+        <result_fields>-/BIC/ZB3CFBK08 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ELSEIF L_DATE_DIFF_IN_DAYS < 30.
+* DAY 15 -> 30
+        <result_fields>-/BIC/ZB3CFBK09 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ELSEIF L_DATE_DIFF_IN_DAYS < 180.
+* NO BUCKET
+      ELSEIF L_DATE_DIFF_IN_DAYS < 365.
+* DAY 181 -> 365
+        <result_fields>-/BIC/ZB3CFBK10 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ELSEIF L_DATE_DIFF_IN_DAYS < 730.
+* > 1 YR -> 2 YEARS
+        <result_fields>-/BIC/ZB3CFBK11 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ELSEIF L_DATE_DIFF_IN_DAYS < 1095.
+* > 2 YR -> 3 YEARS
+        <result_fields>-/BIC/ZB3CFBK12 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ELSEIF L_DATE_DIFF_IN_DAYS < 1825.
+* > 3 YR -> 5 YEARS
+        <result_fields>-/BIC/ZB3CFBK13 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ELSEIF L_DATE_DIFF_IN_DAYS < 3650.
+* > 5 YR -> 10 YEARS
+        <result_fields>-/BIC/ZB3CFBK14 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ELSE.
+* > 10 YEARS
+        <result_fields>-/BIC/ZB3CFBK15 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ENDIF.
+
+* NEW REQUIREMENT DAY 1 -> 90
+* FROM ABOVE ZB3CFBK01 1 -> 30 + ZB3CFBK01 DAY 31 -> 90,
+<result_fields>-/BIC/ZB3CFBK16 =
+<result_fields>-/BIC/ZB3CFBK01 + <result_fields>-/BIC/ZB3CFBK02.
+
+
+* ADD TO ROW TOTAL - EXCLUDE THE CASHFLOWS IN THE PAST IE
+      IF L_DATE_DIFF_IN_DAYS < 0.
+* CASHFLOW IN THE PAST - BUCKET TO KKEP TRACK
+        <result_fields>-/BIC/ZB3CFBK00 =
+        <result_fields>-/BIC/ZB3EUR001.
+      ENDIF.
+
+    ENDLOOP.
+
+
+
+
+*$*$ end of routine - insert your code only before this line         *-*
+  ENDMETHOD.                    "end_routine
+*----------------------------------------------------------------------*
+*       Inverse method inverse_end_routine
+*----------------------------------------------------------------------*
+*       This subroutine needs to be implemented only for direct access
+*       (for better performance) and for the Report/Report Interface
+*       (drill through).
+*       The inverse routine should transform a projection and
+*       a selection for the target to a projection and a selection
+*       for the source, respectively.
+*       If the implementation remains empty all fields are filled and
+*       all values are selected.
+*----------------------------------------------------------------------*
+*       Customer comment:
+*----------------------------------------------------------------------*
+  METHOD inverse_end_routine.
+
+*   IMPORTING
+*     i_r_selset_outbound          TYPE REF TO cl_rsmds_set
+*     i_th_fields_outbound         TYPE HASHED TABLE
+*     i_r_selset_outbound_complete TYPE REF TO cl_rsmds_set
+*     i_r_universe_inbound         TYPE REF TO cl_rsmds_universe
+*   CHANGING
+*     c_r_selset_inbound           TYPE REF TO cl_rsmds_set
+*     c_th_fields_inbound          TYPE HASHED TABLE
+*     c_exact                      TYPE rs_bool
+
+*$*$ begin of inverse routine - insert your code only below this line*-*
+    ... "insert your code here
+*$*$ end of inverse routine - insert your code only before this line *-*
+
+  ENDMETHOD.                    "inverse_end_routine
+
+  METHOD new_record__end_routine.
+
+***** IMPLEMENTATION  is only visible in generated program *****
+
+  ENDMETHOD.
+ENDCLASS.                    "routine IMPLEMENTATION
